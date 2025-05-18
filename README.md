@@ -1,14 +1,40 @@
-# Welcome to your CDK TypeScript project
+# ETL CDK Project
 
-This is a blank project for CDK development with TypeScript.
+This project is an AWS CDK stack written in TypeScript that deploys a scheduled **ETL process** using AWS Lambda, Amazon EventBridge, and S3. It also provides an API endpoint to download the generated CSV files.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+---
 
-## Useful commands
+## 📦 Project Structure
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+- **Lambda (ETL job)**: Extracts data from an external API, transforms it, validates the schema, and stores the result as a CSV in an S3 bucket.
+- **EventBridge Rule**: Triggers the ETL Lambda every day at **00:00 UTC**.
+- **S3 Bucket**: Stores the CSV output files.
+- **API Gateway + Lambda**: Allows users to download the selected CSV file.
+
+---
+
+## 🚀 Deployment Instructions
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Build the project
+
+```bash
+npm run build
+```
+
+### 3. Deploy the stack
+
+```bash
+cdk deploy
+```
+
+This will provision:
+- An S3 Bucket
+- ETL Lambda
+- Event bridge ( runnint daily at 00:00 UTC)
+- An API Gateway to manage CSV downloads
