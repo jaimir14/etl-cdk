@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { jsonToCsv } from '../utils/csvUtils';
+import { Readable } from 'stream';
 
 export class S3Service {
   private s3Client: S3Client;
@@ -30,18 +30,25 @@ export class S3Service {
   }
 
   /**
-   * Generates a presigned URL for downloading a file from S3.
+   * Gets data as a CSV file from S3.
    * @param key - The S3 object key (e.g., 'Canada.csv').
-   * @param expiresIn - URL expiration time in seconds (default: 3600 seconds).
-   * @returns A presigned URL string.
    */
-  async getPresignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getCsv(key: string): Promise<string> {    
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
       Key: key,
     });
 
-    const url = await getSignedUrl(this.s3Client, command, { expiresIn });
-    return url;
+    const response = await this.s3Client.send(command);
+    // Convert the response body (a stream) to a string
+    const streamToString = (stream: Readable): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const chunks: any[] = [];
+        stream.on('data', (chunk) => chunks.push(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      });
+
+    return await streamToString(response.Body as Readable);
   }
 }

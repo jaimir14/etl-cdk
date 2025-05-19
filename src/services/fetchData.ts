@@ -24,9 +24,7 @@ export async function fetchData(country: string): Promise<Response[]> {
 
   const url = new URL('search', baseUrl);
   url.searchParams.append('country', country);
-
   for(let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-
     try {
       const response = await fetch(url.toString());
       console.log({response, url: url.toString()})
@@ -34,19 +32,17 @@ export async function fetchData(country: string): Promise<Response[]> {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 
       }
-
       const data = await response.json() as Response[];
       return data;
     } catch (error: any) {
       const isLastAttempt = attempt === MAX_RETRIES;
-
       console.warn(`Fetch attempt ${attempt} failed: ${error.message}`);
-
       if (isLastAttempt) {
         console.error("All fetch attempts failed.");
         throw error;
       }
 
+      // Exponential backoff, wait for the issue to be solved increasing the delay on each attempt
       const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
