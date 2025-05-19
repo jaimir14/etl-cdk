@@ -62,3 +62,29 @@ This will provision:
 - ETL Lambda
 - Event bridge ( runnint daily at 00:00 UTC)
 - An API Gateway to manage CSV downloads
+
+---
+
+## Future improvements
+
+### 🔄 Efficient Update Strategy with Checksums
+
+To optimize the ETL process and avoid unnecessary data processing, implement a checksum-based validation mechanism:
+
+- **Checksum Validation**: Compute a checksum (e.g., SHA-256) for the fetched data and compare it against the previously stored checksum. If the checksums match, the data hasn't changed, and the ETL process can be skipped.
+
+- **Source Update Verification**: If the source API provides metadata about the last update time, use this information to determine whether to proceed with the ETL process. It can even synchronized with the update time of the source to make it hourly, daily or weekly.
+
+---
+
+### 📬 Scaling ETL Processing with Amazon SQS
+
+To handle increased data volume and improve fault tolerance, I consider that integrating Amazon Simple Queue Service (SQS) in the architecture would be a good option:
+
+- **Parallel Processing**:Breaking down the ETL tasks into smaller units (e.g., per country) and enqueue them in SQS. Multiple Lambda functions can then process these messages concurrently, enabling parallel data processing.
+
+- **Error Handling and Retries**: Configuring Dead Letter Queues (DLQs) for messages that fail processing after a specified number of attempts. This ensures that problematic data doesn't block the processing pipeline and can be reviewed or retried later.
+
+- **Scalability**: SQS decouples the data ingestion layer from the processing layer, allowing each to scale independently based on demand, for instance if it is required in the future to add more filters not just country, or if it would be also an option to add more data besides universities.
+
+---
