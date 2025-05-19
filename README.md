@@ -62,5 +62,3 @@ This will provision:
 - ETL Lambda
 - Event bridge ( runnint daily at 00:00 UTC)
 - An API Gateway to manage CSV downloads
-
-## General Instructions
